@@ -19,6 +19,7 @@ def main():
     os.makedirs("books", exist_ok=True)
     os.makedirs("covers", exist_ok=True)
     os.makedirs("comments", exist_ok=True)
+    
     for book_id in range(args.start_id, args.end_id+1):
         url = f"https://tululu.org/b{book_id}/"
         response = requests.get(url, allow_redirects=True)
@@ -40,6 +41,7 @@ def main():
             for genre in genres:
                 print("\t", genre.text)
             print()
+
 
 def check_for_redirect(history):
     return history
@@ -68,7 +70,7 @@ def download(url, filename, params={}, redirect_check=True, folder='books', exte
     response = requests.get(url, params=params, allow_redirects=redirect_check)
     response.raise_for_status()
 
-    if redirect_check and check_for_redirect(response.history):
+    if redirect_check and response.history:
         return
 
     filepath = os.path.join(folder, sanitize_filepath(filename.strip()))
