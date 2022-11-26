@@ -18,40 +18,41 @@ def main():
         if check_for_redirect(response.history):
             continue
         else:  
-            get_book_with_covers(response, book_id)
+            title, picture_path, comments, genres = parse_book_page(response, book_id)
+            filename = f"{book_id}. {title}"
 
+            download("https://tululu.org/txt.php", filename, params={"id": book_id})   
+            
+            img_name, extension =  os.path.splitext(picture_path.split('/')[-1])
+            download(f"https://tululu.org{picture_path}", img_name, folder="covers", extension=extension)
+
+            get_comments(filename, comments)
+
+            print(filename)
+            for genre in genres:
+                print("\t", genre.text)
+            print()
 
 def check_for_redirect(history):
     return history
 
 
-def get_book_with_covers(response, book_id):
+def parse_book_page(response, book_id):
     soup = BeautifulSoup(response.text, 'lxml')
     title, _ = soup.find('body').find('table').find('h1').text.split("::")
-    picture_url = soup.find('div', class_='bookimage').find('img')['src']
-
-    filename = f"{book_id}. {title}"
-    #download("https://tululu.org/txt.php", filename, params={"id": book_id})
-
-    #img_name, extension =  os.path.splitext(picture_url.split('/')[-1])
-    #download(f"https://tululu.org{picture_url}", img_name, folder="img", extension=extension)
-
+    picture_path = soup.find('div', class_='bookimage').find('img')['src']
     comments = soup.find_all('div', class_="texts")#)#.find_all('span', class_="black"))
+    genres = soup.find('span', class_="d_book").find_all('a')
+    return title, picture_path, comments, genres
+
+
+def get_comments(filename, comments):
     filepath = os.path.join("comments", sanitize_filepath(filename.strip()))
     if comments:
         with open(f"{filepath}.txt", 'wb') as file:
             for comment in comments:
                 comment_text = comment.find('span', class_="black").text
                 file.write(bytes(comment_text, encoding = 'utf-8'))
-
-
-    genres = soup.find('span', class_="d_book").find_all('a')
-    print(filename)
-    for genre in genres:
-        print("\t", genre.text)
-    print()
-
-
 
 
 def download(url, filename, params={}, redirect_check=True, folder='books', extension="txt"):
@@ -61,13 +62,10 @@ def download(url, filename, params={}, redirect_check=True, folder='books', exte
     if redirect_check and check_for_redirect(response.history):
         return
 
-    print(response.url)
-
     filepath = os.path.join(folder, sanitize_filepath(filename.strip()))
     with open(f"{filepath}.{extension}", 'wb') as file:
         file.write(response.content)
 
-#def save_comments()
 
 if __name__ == '__main__':
     main()
