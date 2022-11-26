@@ -1,17 +1,25 @@
-import requests
+import argparse
 import os
+import requests
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filepath
 from urllib.parse import urlparse
 
-from pprint import pprint
+
 
 def main():
+    parser = argparse.ArgumentParser(
+        description='Скачивает книги с сайта https://tululu.org/ с [start_id] по [end_id]'
+    )
+    parser.add_argument('start_id', help='id первой книги', type=int)
+    parser.add_argument('end_id', help='id последней книги', type=int)
+    args = parser.parse_args()
+
     number_of_books = 10
     os.makedirs("books", exist_ok=True)
     os.makedirs("covers", exist_ok=True)
     os.makedirs("comments", exist_ok=True)
-    for book_id in range(1, number_of_books+1):
+    for book_id in range(args.start_id, args.end_id+1):
         url = f"https://tululu.org/b{book_id}/"
         response = requests.get(url, allow_redirects=True)
         response.raise_for_status()
@@ -53,6 +61,7 @@ def get_comments(filename, comments):
             for comment in comments:
                 comment_text = comment.find('span', class_="black").text
                 file.write(bytes(comment_text, encoding = 'utf-8'))
+                file.write(bytes("\n\n", encoding = 'utf-8'))
 
 
 def download(url, filename, params={}, redirect_check=True, folder='books', extension="txt"):
