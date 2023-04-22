@@ -15,7 +15,6 @@ def main():
     parser.add_argument('end_id', help='id последней книги', type=int)
     args = parser.parse_args()
 
-    number_of_books = 10
     os.makedirs("books", exist_ok=True)
     os.makedirs("covers", exist_ok=True)
     os.makedirs("comments", exist_ok=True)
