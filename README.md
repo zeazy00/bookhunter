@@ -1,6 +1,6 @@
-# Парсер книг с сайта tululu.org
+# Парсер книг с сайта [tululu.org](https://tululu.org/)
 
-Проект скачивает книги с сайта tululu.org
+Проект скачивает книги с сайта [tululu.org](https://tululu.org/)
 
 ### Как установить
 
