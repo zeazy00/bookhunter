@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Скачивает книги с сайта https://tululu.org/ с [start_id] по [end_id]'
+        description="Скачивает книги с сайта https://tululu.org/ с [start_id] по [end_id]"
     )
     parser.add_argument('start_id', help='id первой книги', type=int)
     parser.add_argument('end_id', help='id последней книги', type=int)
