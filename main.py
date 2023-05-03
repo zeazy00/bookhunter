@@ -68,11 +68,6 @@ def get_book(book_id):
     logging.info(f"{filename}\n\t{genres}")
 
 
-def check_for_redirect(response):
-    if response.history:
-        raise RedirectError
-
-
 def parse_book_page(response, book_id):
     soup = BeautifulSoup(response.text, 'lxml')
     title, _ = soup.find('body').find('table').find('h1').text.split("::")
@@ -92,12 +87,17 @@ def get_comments(filename, comments):
                 file.write(bytes("\n\n", encoding = 'utf-8'))
 
 
+def check_for_redirect(response):
+    if response.history:
+        raise RedirectError
+
+
 def download(url, filename, params={}, redirect_check=True, folder='books', extension="txt"):
     response = requests.get(url, params=params, allow_redirects=redirect_check)
     response.raise_for_status()
 
-    if redirect_check and response.history:
-        raise RedirectError
+    if redirect_check:
+        check_for_redirect(response)
 
     filepath = os.path.join(folder, sanitize_filepath(filename.strip()))
     with open(f"{filepath}.{extension}", 'wb') as file:
