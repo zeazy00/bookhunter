@@ -35,6 +35,7 @@ def main():
         while not status:
             try:
                 get_book(book_id)
+                status = True
             except requests.exceptions.ConnectionError:
                 logging.warning(f"ConnectionError | TRY: {attempt} | ID: {book_id}")
                 attempt += 1
@@ -62,9 +63,9 @@ def get_book(book_id):
     img_name, extension =  os.path.splitext(picture_path.split('/')[-1])
     download(f"https://tululu.org{picture_path}", img_name, folder="covers", extension=extension)
 
-    get_comments(filename, comments)
+    if comments:
+        get_comments(filename, comments)
 
-    genres = [genre.text for genre in genres]
     logging.info(f"{filename}\n\t{genres}")
 
 
@@ -74,17 +75,17 @@ def parse_book_page(response, book_id):
     picture_path = soup.find('div', class_='bookimage').find('img')['src']
     comments = soup.find_all('div', class_="texts")
     genres = soup.find('span', class_="d_book").find_all('a')
+    genres = [genre.text for genre in genres]
     return title, picture_path, comments, genres
 
 
 def get_comments(filename, comments):
     filepath = os.path.join("comments", sanitize_filepath(filename.strip()))
-    if comments:
-        with open(f"{filepath}.txt", 'wb') as file:
-            for comment in comments:
-                comment_text = comment.find('span', class_="black").text
-                file.write(bytes(comment_text, encoding = 'utf-8'))
-                file.write(bytes("\n\n", encoding = 'utf-8'))
+    with open(f"{filepath}.txt", 'wb') as file:
+        for comment in comments:
+            comment_text = comment.find('span', class_="black").text
+            file.write(bytes(comment_text, encoding = 'utf-8'))
+            file.write(bytes("\n\n", encoding = 'utf-8'))
 
 
 def check_for_redirect(response):
